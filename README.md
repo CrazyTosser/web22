@@ -7,3 +7,4 @@
 - Создан контроллер Main с index и назначен путем по умолчанию
 - Подключен JQuery, Bootstrap и Font-Awesome
 - Поправлен application слой для отображения данной favicon и применены стили Bootstrap
+- Подключен Postgres и создана модель User
