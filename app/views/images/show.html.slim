@@ -1,0 +1,17 @@
+p#notice = notice
+
+p
+  strong Name:
+  = @image.name
+
+p
+  strong File:
+  = @image.file
+
+p
+  strong Ave value:
+  = @image.ave_value
+
+=> link_to 'Edit', edit_image_path(@image)
+'|
+=< link_to 'Back', images_path
