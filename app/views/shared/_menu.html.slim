@@ -1,0 +1,20 @@
+b-navbar
+  template(#brand)
+    b-navbar-item href="/"
+      = image_tag("favicon.ico")
+  template(#start)
+    b-navbar-item(href="#{url_for(action: 'index', controller: 'images')}") Home
+    b-navbar-item(href="#") Documentation
+    b-navbar-dropdown label="Info"
+      b-navbar-item(href="#") About
+      b-navbar-item(href="#") Contact
+  template(#end)
+    b-navbar-item tag="div"
+      div.buttons
+        a.button.is-primary
+          strong Sign up
+        a.button.is-light  Log in
+
+javascript:
+    const app = new Vue()
+    app.$mount('#nav')
