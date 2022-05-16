@@ -1,2 +1,6 @@
 en:
   name: "Framework evaluation"
+  hello: "Web framework evaluation system"
+  menu_main: "Main"
+  menu_work: "List"
+  menu_log: "Log in"

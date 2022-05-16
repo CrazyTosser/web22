@@ -1,4 +1,7 @@
 section.hero.is-halfheight.is-info
   .hero-body
-    p.title #{t "hello"}
+    div
+      p.title #{t "hello"}
+      p.subtitle
+        a.button(href="#{url_for(action: 'index', controller: 'work')}") Начать работу
 
