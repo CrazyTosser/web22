@@ -12,7 +12,10 @@ ActiveRecord::Base.connection.execute(
   "ALTER SEQUENCE #{Theme.table_name}_id_seq RESTART WITH 1"
 )
 ActiveRecord::Base.connection.execute(
-  "ALTER SEQUENCE #{Image.table_name}_id_seq RESTART WITH 1"
+  "ALTER SEQUENCE #{Framework.table_name}_id_seq RESTART WITH 1"
+)
+ActiveRecord::Base.connection.execute(
+  "ALTER SEQUENCE #{Value.table_name}_id_seq RESTART WITH 1"
 )
 ActiveRecord::Base.connection.execute(
   "ALTER SEQUENCE #{User.table_name}_id_seq RESTART WITH 1"
@@ -25,14 +28,22 @@ Theme.create!([
                 { name: 'tst' }
               ])
 
-Image.delete_all
-Image.create!([
-               { name: '123', file: '123', theme_id: 2 },
-               { name: '321', file: '321', theme_id: 2 },
-               { name: '111', file: '111', theme_id: 3 }
-             ])
-
 User.delete_all
 User.create!([
-              { name: 'example', email: '123' }
-            ])
+               { name: 'example', email: 'test@test.tt', password_digest: BCrypt::Password.create("123456").to_s },
+               { name: 'example2', email: 'test2@test.tt', password_digest: BCrypt::Password.create("123456").to_s }
+             ])
+
+Framework.delete_all
+Framework.create!([
+               { name: '123', description: '321', file: '', theme_id: 2, user_id: 1 },
+               { name: '321', description: '123', file: '', theme_id: 2, user_id: 2 },
+               { name: '111', description: '321', file: '', theme_id: 3, user_id: 1 }
+             ])
+
+Value.delete_all
+Value.create!([
+                {value: 4, user_id: 1, framework_id: 1}
+              ])
+
+

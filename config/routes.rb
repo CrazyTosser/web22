@@ -1,11 +1,12 @@
 Rails.application.routes.draw do
+  post 'sessions/create'
+  post 'sessions/new'
+  get 'sessions/destroy'
   get 'work/index'
-  get 'work/choose_theme'
-  get 'work/display_theme'
-  resources :themes
-  resources :images
-  resources :values
-  resources :users
+  post 'work/show_framework'
+  put 'work/new_framework'
+  get 'work/borrowed'
+  get 'work/themes'
   root "main#index"
 
   get 'main/index'

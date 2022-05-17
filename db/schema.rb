@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_04_04_200236) do
+ActiveRecord::Schema[7.0].define(version: 2022_05_17_111035) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "frameworks", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "file"
+    t.integer "user_id"
+    t.integer "theme_id"
+    t.float "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "images", force: :cascade do |t|
     t.string "name"
@@ -35,12 +46,16 @@ ActiveRecord::Schema[7.0].define(version: 2022_04_04_200236) do
     t.string "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "password_digest"
+    t.string "remember_token"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["remember_token"], name: "index_users_on_remember_token"
   end
 
   create_table "values", force: :cascade do |t|
     t.integer "value"
     t.integer "user_id"
-    t.integer "image_id"
+    t.integer "framework_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

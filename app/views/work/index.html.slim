@@ -1,2 +1,48 @@
-h1 Work#index
-p Find me in app/views/work/index.html.slim
+section#app.hero.is-halfheight
+  .hero-body
+    aside.menu
+      b-menu
+        b-menu-list
+          - @themes.each do |k, v|
+            b-menu-item(label=v)
+              - @frameworks[k].each do |key, val|
+                b-menu-item(label=val @click="show(#{key})")
+    .content.ml-6(ref="content")
+
+
+javascript:
+  const main = new Vue({
+      data() {
+          return {
+          }
+      },
+      methods: {
+          show(id) {
+              axios({
+                  'url': '#{url_for action: 'show_framework', controller: 'work'}&id=' + id,
+                  'method': 'post',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest',
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                  }
+              }).then(el => {
+                  this.$refs.content.innerHTML = "<h1>" + el.data.name +"</h1><h3> added by " + el.data.creator +"</h3>" +
+                      "<div class='block'> "+ el.data.desc +"</div>";
+              }).catch(error => {
+                  if (error.response) {
+                      console.log(error.response.data);
+                      console.log(error.response.status);
+                      console.log(error.response.headers);
+                  } else if (error.request) {
+                      console.log(error.request);
+                  } else {
+                      console.log('Error', error.message);
+                  }
+                  console.log(error.config);
+              });
+          }
+      },
+      #{params[:id] ? 'mounted() {this.show(' + params[:id].to_s + ')}' : '' }
+  });
+  main.$mount('#app');

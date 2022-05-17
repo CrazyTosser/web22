@@ -1,21 +1,251 @@
-b-navbar
-  template(#brand)
-    b-navbar-item href="/"
-      = image_tag("favicon.ico")
-  template(#start)
-    b-navbar-item(href="#{url_for(action: 'index', controller: 'images')}") #{t "menu_main"}
-    b-navbar-item(href="#{url_for(action: 'index', controller: 'work')}") #{t "menu_work"}
-  template(#end)
-    b-navbar-item tag="div"
-      div.buttons
-        a.button.is-primary
-          strong #{t "menu_log"}
-        a.button.is-light href="#{original_url.split('?').first}?locale=#{locale == :ru ? 'ru' : 'en'}"
-          - if locale == :ru
-            | ru
+div#nav
+  b-navbar
+    template(#brand)
+      b-navbar-item href="/"
+        = image_tag("favicon.ico")
+    template(#start)
+      b-navbar-item(href="#{url_for(action: 'index', controller: 'work')}") #{t "menu_main"}
+      - unless current_user.nil?
+        b-navbar-item(href="#{url_for(action: 'borrowed', controller: 'work')}") #{t "menu_work"}
+        b-navbar-item(@click="isModalActive = true") #{t "add_work"}
+    template(#end)
+      b-navbar-item tag="div"
+        - if !current_user.nil?
+          .block.m-0.mr-3
+            == t("hello_msg") + ', ' + current_user.name
+        div.buttons
+          - if current_user.nil?
+            a.button.is-primary(@click="show(1)")
+              strong #{t "menu_log"}
           - else
-            | en
+            a.button.is-warning href="#{url_for(action: 'destroy', controller: "sessions")}"
+              strong #{t "exit"}
+          a.button.is-light href="#{request.original_url.split('?').first}?locale=#{locale == :ru ? 'en' : 'ru'}"
+            - if locale == :en
+              | ru
+            - else
+              | en
+  - if current_user.nil?
+    b-modal(v-model="isModalActive")
+      .card
+        .card-content
+          b-field(label="#{t "email"}")
+            b-input(v-model="email" required)
+          b-field(label="#{t "pass"}")
+            b-input(v-model="pass" type="password" required)
+          .field.is-grouped
+            p.control
+              button.button.is-success @click="login"
+                == t "submit"
+            p.control
+              button.button.is-light @click="show(2)"
+                == t "registration"
+    b-modal(v-model="isRegShow")
+      .card
+        .card-content
+          b-field(label="#{t "email"}")
+            b-input(type="email" v-model="email" required)
+          b-field(label="#{t "login"}" )
+            b-input(v-model="name" required)
+          b-field(label="#{t "pass"}" :type="passType" :message="msg")
+            b-input(v-model="password" required :lazy="true" type="password" password-reveal minlength="6")
+          b-field(label="#{t "passr"}" :type="passType")
+            b-input(v-model="passwordReapeat" :lazy="true" type="password" required)
+          .field.is-grouped
+            p.control
+              button.button.is-success @click="reg"
+                == t "registration"
+  - else
+    b-modal(v-model="isModalActive")
+      .card
+        .card-content
+          b-field(label="#{t "frame_name"}")
+            b-input(v-model="name" required)
+          b-field(label="#{t "frame_desc"}")
+            b-input(v-model="desc" type="textarea" required)
+          b-field(label="#{t "frame_theme"}")
+            b-select(v-model="theme_id" expanded)
+              option(v-for="el in themes" :value="el.id" :key="el.id")
+                | {{ el.name }}
+          .field.is-grouped
+            p.control
+              button.button.is-success @click="create"
+                == t "submit"
 
-javascript:
-    const app = new Vue()
-    app.$mount('#nav')
+- if current_user.nil?
+  javascript:
+      const app = new Vue({
+          data() {
+              return {
+                  isModalActive: false,
+                  isRegShow: false,
+                  pass: "",
+                  email: "",
+                  name: '',
+                  password: '',
+                  passwordReapeat: '',
+                  msg: '', passType: '',
+              }
+          },
+          watch: {
+              password(val) {
+                  if (this.passwordReapeat.length > 0 && this.passwordReapeat !== val) {
+                      this.passType = 'is-danger';
+                      this.msg = '#{t "wrong_pass"}';
+                  } else if (this.passwordReapeat === val) {
+                      this.passType = 'is-success';
+                      this.msg = '';
+                  }
+              },
+              passwordReapeat(val) {
+                  if (this.password.length > 0 && this.password !== val) {
+                      this.passType = 'is-danger';
+                      this.msg = '#{t "wrong_pass"}';
+                  } else if (this.password === val) {
+                      this.passType = 'is-success';
+                      this.msg = '';
+                  }
+              }
+          },
+          methods: {
+              show(el) {
+                  if (el === 1) {
+                    this.isModalActive = true;
+                    this.isRegShow = false;
+                } else if (el === 2) {
+                      this.isModalActive = false;
+                      this.isRegShow = true;
+                  }
+              },
+              reg() {
+                  if (this.passType === 'is-success' && this.email.length > 0 && this.name.length > 0) {
+                      axios({
+                          url: "#{url_for action: 'new', controller: 'sessions'}",
+                          method: 'post',
+                          data: JSON.stringify({'email': this.email,
+                              'name': this.name, 'pass': this.password, 'pass2': this.passwordReapeat}),
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-Requested-With': 'XMLHttpRequest',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                          }
+                      }).then(resp => {
+                          if (resp.data.error !== undefined)
+                              this.$buefy.toast.open({
+                                  type: 'is-danger',
+                                  message: resp.data.error
+                              });
+                          else if (resp.data.url !== undefined)
+                              location.replace(resp.data.url);
+                          else
+                              this.$buefy.toast.open({
+                                  type: 'is-danger',
+                                  message: 'Something wrong please reload page'
+                              });
+                      }).catch(error => {
+                          if (error.response) {
+                              console.log(error.response.data);
+                              console.log(error.response.status);
+                              console.log(error.response.headers);
+                          } else if (error.request) {
+                              console.log(error.request);
+                          } else {
+                              console.log('Error', error.message);
+                          }
+                          console.log(error.config);
+                      });
+                  }
+              },
+              login() {
+                  if (this.email.trim().length === 0 || this.pass.trim().length === 0)
+                      return;
+                  axios({
+                      url: "#{url_for action: 'create', controller: 'sessions'}",
+                      method: 'post',
+                      data: JSON.stringify({'email': this.email, 'password': this.pass}),
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-Requested-With': 'XMLHttpRequest',
+                          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                      }
+                  }).then(resp => {
+                      if (resp.data.error !== undefined)
+                          this.$buefy.toast.open({
+                              type: 'is-danger',
+                              message: resp.data.error
+                          });
+                      else if (resp.data.url !== undefined)
+                          location.replace(resp.data.url);
+                      else
+                          this.$buefy.toast.open({
+                              type: 'is-danger',
+                              message: 'Something wrong please reload page'
+                          });
+                  }).catch(error => {
+                      if (error.response) {
+                          console.log(error.response.data);
+                          console.log(error.response.status);
+                          console.log(error.response.headers);
+                      } else if (error.request) {
+                          console.log(error.request);
+                      } else {
+                          console.log('Error', error.message);
+                      }
+                      console.log(error.config);
+                  });
+              }
+          },
+          #{params[:login] ? 'mounted() {this.isModalActive = true;}' : '' }
+      })
+      app.$mount('#nav')
+- else
+  javascript:
+      const app = new Vue({
+          data() {
+              return {
+                  isModalActive: false,
+                  themes: [],
+                  name: '',
+                  desc: '',
+                  theme_id: 0
+              }
+          },
+          methods: {
+              create() {
+                  if (this.name.length > 0 && this.desc.length > 0 && this.theme_id > 0) {
+                      axios({
+                          url: "#{url_for action: 'new_framework', controller: 'work'}",
+                          method: 'put',
+                          data: JSON.stringify({
+                              'desc': this.desc, 'name': this.name, 'theme': this.theme_id
+                          }),
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-Requested-With': 'XMLHttpRequest',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                          }
+                      }).then(resp => {
+                          if (resp.data.id !== undefined)
+                              location.replace("#{url_for action: 'borrowed', controller: 'work'}&id="+resp.data.id)
+                      }).catch(error => {
+                          if (error.response) {
+                              console.log(error.response.data);
+                              console.log(error.response.status);
+                              console.log(error.response.headers);
+                          } else if (error.request) {
+                              console.log(error.request);
+                          } else {
+                              console.log('Error', error.message);
+                          }
+                          console.log(error.config);
+                      });
+                  }
+              },
+          },
+          mounted() {
+              axios.get("#{url_for action: 'themes', controller: 'work'}").then(el => {
+                  this.themes = el.data
+              })
+          }
+      })
+      app.$mount('#nav')
