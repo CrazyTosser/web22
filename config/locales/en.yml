@@ -17,3 +17,5 @@ en:
   frame_name: "Name"
   frame_desc: "Description"
   frame_theme: "Category"
+  up: "for"
+  down: "against"

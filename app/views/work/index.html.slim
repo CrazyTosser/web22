@@ -7,13 +7,15 @@ section#app.hero.is-halfheight
             b-menu-item(label=v)
               - @frameworks[k].each do |key, val|
                 b-menu-item(label=val @click="show(#{key})")
-    .content.ml-6(ref="content")
+    .container.ml-6
+      .content(ref="content")
 
 
 javascript:
   const main = new Vue({
       data() {
           return {
+              id: 0
           }
       },
       methods: {
@@ -28,7 +30,36 @@ javascript:
                   }
               }).then(el => {
                   this.$refs.content.innerHTML = "<h1>" + el.data.name +"</h1><h3> added by " + el.data.creator +"</h3>" +
-                      "<div class='block'> "+ el.data.desc +"</div>";
+                      "<div class='block'> "+ el.data.desc +"</div>" +
+                      "<div class='block'>Rating:" + el.data.rate +"</div> " +
+                      "<div class='is-flex is-flex-direction-row is-justify-content-space-between'>" +
+                      "#{t "vote"} <button type='button' class='button is-success'>#{t "up"}</button>" +
+                  "<button type='button' class='button is-danger'>#{t "down"}</button></div>";
+                  this.id = id;
+                  document.querySelector('button.is-success').addEventListener('click', () => {
+                      axios({
+                          'url': '#{url_for action: 'freamvote', controller: 'work'}',
+                          'method': 'post',
+                          data: {'id': this.id, 'vote': 1},
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-Requested-With': 'XMLHttpRequest',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                          }
+                      }).then(() => this.show(this.id));
+                  });
+                  document.querySelector('button.is-danger').addEventListener('click', () => {
+                      axios({
+                          'url': '#{url_for action: 'freamvote', controller: 'work'}',
+                          'method': 'post',
+                          data: {'id': this.id, 'vote': -1},
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-Requested-With': 'XMLHttpRequest',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                          }
+                      }).then(() => this.show(this.id));
+                  });
               }).catch(error => {
                   if (error.response) {
                       console.log(error.response.data);

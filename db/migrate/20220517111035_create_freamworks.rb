@@ -6,7 +6,7 @@ class CreateFreamworks < ActiveRecord::Migration[7.0]
       t.string :file
       t.integer :user_id
       t.integer :theme_id
-      t.float :value
+      t.float :value, :default => 0
 
       t.timestamps
     end

@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get 'sessions/destroy'
   get 'work/index'
   post 'work/show_framework'
+  post 'work/freamvote'
   put 'work/new_framework'
   get 'work/borrowed'
   get 'work/themes'

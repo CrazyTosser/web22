@@ -17,3 +17,6 @@ ru:
   frame_name: "Название"
   frame_desc: "Описание"
   frame_theme: "Категория"
+  up: "за"
+  down: "против"
+  vote: "Голос"
