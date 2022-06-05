@@ -1,11 +1,19 @@
 class SessionsController < ApplicationController
   def new
-    unless params[:session][:email].blank?
+    if params[:session][:email].blank?
+      render json: {error: "empty request"}
+    else
+      unless User.find_by(email: params[:session][:email].downcase).nil?
+        render json: {error: "user already registered"}
+        return
+      end
       if params[:pass] == params[:pass2]
         user = User.new(name: params[:name], email: params[:email].downcase, password: params[:pass])
         user.save!
         sign_in user
         render json: {url: url_for(controller: "work", action: "index")}
+      else
+        render json: {error: "passwords not same"}
       end
     end
   end

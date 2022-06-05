@@ -118,7 +118,8 @@ div#nav
                   }
               },
               reg() {
-                  if (this.passType === 'is-success' && this.email.length > 0 && this.name.length > 0) {
+                  if (this.passType === 'is-success' && this.email.length > 0 && this.name.length > 0
+                      && this.password.length > 0 && this.passwordReapeat.length > 0) {
                       axios({
                           url: "#{url_for action: 'new', controller: 'sessions'}",
                           method: 'post',
@@ -154,7 +155,11 @@ div#nav
                           }
                           console.log(error.config);
                       });
-                  }
+                  } else
+                      this.$buefy.toast.open({
+                          type: 'is-danger',
+                          message: 'Not all fields filled'
+                      });
               },
               login() {
                   if (this.email.trim().length === 0 || this.pass.trim().length === 0)
